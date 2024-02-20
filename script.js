@@ -5,19 +5,18 @@ const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 
 const converToASCII = (e) => {
-    const width = e.target.width;
-    const height = e.target.height;
+    const width = 128;
+    const height = 128;
     canvas.width = width;
     canvas.height = height;
 
     asciiContainer.innerText = "";
-    ctx.drawImage(e.target, 0, 0, canvas.width, canvas.height);
-    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(e.target, 0, 0, width, height);
+    const imgData = ctx.getImageData(0, 0, width, height);
     let arr = imgData.data;
-
+    body.append(canvas);
     for (let i = 0; i < height; i++) {
         for (let j = 0; j < (width * 4); j += 4) {
-            console.log(arr[j + 3]);
             const total = arr[j] + arr[j + 1] + arr[j + 2];
             const greyscale = parseInt(total / 3);
             arr[j] = greyscale;
@@ -28,6 +27,7 @@ const converToASCII = (e) => {
         }
         asciiContainer.innerText += "\n";
         arr = arr.slice((width * 4) + 1);
+        debugger;
     }
 }
 
