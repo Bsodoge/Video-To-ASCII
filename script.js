@@ -14,6 +14,7 @@ const converToASCII = (e) => {
     ctx.drawImage(e.target, 0, 0, width, height);
     const imgData = ctx.getImageData(0, 0, width, height);
     let arr = imgData.data;
+    canvas.style.border = "1px solid black";
     body.append(canvas);
     for (let i = 0; i < height; i++) {
         for (let j = 0; j < (width * 4); j += 4) {
@@ -26,7 +27,7 @@ const converToASCII = (e) => {
             asciiContainer.innerText += greyscale > 100 ? "█" : greyscale > 75 ? "▓" : greyscale > 50 ? "▒" : "░";
         }
         asciiContainer.innerText += "\n";
-        arr = arr.slice((width * 4) + 1);
+        arr = arr.slice((width * 4));
         debugger;
     }
 }
