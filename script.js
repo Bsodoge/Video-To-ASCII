@@ -8,12 +8,14 @@ const convertFrameToAscii = (arr, height, width) => {
     return new Promise(resolve => {
         for (let i = 0; i < height; i++) {
             for (let j = 0; j < (width * 4); j += 4) {
+                console.log(arr[j + 3]);
+                if (arr[j + 3] === 0) { asciiContainer.innerText += "░"; continue; };
                 const total = arr[j] + arr[j + 1] + arr[j + 2];
                 const greyscale = parseInt(total / 3);
                 arr[j] = greyscale;
                 arr[j + 1] = greyscale;
                 arr[j + 2] = greyscale;
-                asciiContainer.innerText += greyscale > 100 ? "█" : greyscale > 75 ? "▓" : greyscale > 50 ? "▒" : "░";
+                asciiContainer.innerText += greyscale > 100 ? "█" : greyscale > 75 ? "▓" : "▒";
             }
             asciiContainer.innerText += "\n";
             arr = arr.slice((width * 4));
