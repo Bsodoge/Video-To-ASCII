@@ -20,7 +20,7 @@ const getFrames = async (videoUrl) => {
         },
         onFinish() {
             console.log("finished!");
-          }
+        }
     });
     console.log(frames);
     return frames;
@@ -30,28 +30,28 @@ const getFrames = async (videoUrl) => {
 const convertFrameToAscii = (arr, height, width) => {
     return new Promise((resolve, reject) => {
         try {
+            let frameData = "";
             for (let i = 0; i < height; i++) {
                 for (let j = 0; j < (width * 4); j += 4) {
-                    console.log(arr[j + 3]);
-                    if (arr[j + 3] === 0) { asciiContainer.innerText += "░"; continue; };
+                    if (arr[j + 3] === 0) { frameData += "░"; continue; };
                     const total = arr[j] + arr[j + 1] + arr[j + 2];
                     const greyscale = parseInt(total / 3);
                     arr[j] = greyscale;
                     arr[j + 1] = greyscale;
                     arr[j + 2] = greyscale;
-                    asciiContainer.innerText += greyscale > 100 ? "█" : greyscale > 75 ? "▓" : "▒";
+                    frameData += greyscale > 100 ? "█" : greyscale > 75 ? "▓" : "▒";
                 }
-                asciiContainer.innerText += "\n";
+                frameData += "\n";
                 arr = arr.slice((width * 4));
             }
-            resolve(arr);
+            resolve(frameData);
         } catch (error) {
             reject(error);
         }
     })
 }
 
-const handleLoadImage = async (frame) => {
+const handleFrame = async (frame) => {
     const width = 128;
     const height = 128;
     canvas.width = width;
@@ -62,17 +62,26 @@ const handleLoadImage = async (frame) => {
     const imgData = ctx.getImageData(0, 0, width, height);
     let arr = imgData.data;
     canvas.style.border = "1px solid black";
-    body.append(canvas);
-    await convertFrameToAscii(arr, height, width);
+    const asciiFrame =  await convertFrameToAscii(arr, height, width);
+    return asciiFrame;
 }
 
 const getImageDetails = async (e) => {
     const videoUrl = URL.createObjectURL(e.target.files[0]);
-    console.log(videoUrl);
     const frames = await getFrames(videoUrl);
-    setTimeout(frames.forEach(async (frame) => {
-        await handleLoadImage(frame);
-    }), 1000);
+    let asciiFrames = [];
+    frames.forEach(async (frame, i) => {
+        asciiFrames[i] = await handleFrame(frame);
+    })
+    let frameCount = 0;
+    const playVideo = setInterval(() => {
+        asciiContainer.innerText = asciiFrames[frameCount];
+        frameCount++;
+        if(frameCount === asciiFrames.length) {
+            clearInterval(playVideo);
+            console.log(frameCount);
+        }
+    }, 100)
 
 }
 
