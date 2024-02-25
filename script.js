@@ -7,7 +7,7 @@ const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 
 
-const getFrames = async (videoUrl) => {
+const getFrames = async videoUrl => {
     let frames = [];
     await getVideoFrames({
         videoUrl,
@@ -62,12 +62,32 @@ const handleFrame = async (frame) => {
     const imgData = ctx.getImageData(0, 0, width, height);
     let arr = imgData.data;
     canvas.style.border = "1px solid black";
-    const asciiFrame =  await convertFrameToAscii(arr, height, width);
+    const asciiFrame = await convertFrameToAscii(arr, height, width);
     return asciiFrame;
 }
 
-const getImageDetails = async (e) => {
+const loadVideo = videoUrl => new Promise((resolve, reject) => {
+    try {
+        const video = document.createElement("video");
+        video.preload = "metadata";
+
+        video.onloadedmetadata = () => {
+            resolve(video);
+        }
+
+        video.onerror = () => {
+            reject("Invalid video. Please select a video file.")
+        }
+        video.src = videoUrl;
+    } catch (error) {
+        reject(error);
+    }
+})
+
+
+const getImageDetails = async e => {
     const videoUrl = URL.createObjectURL(e.target.files[0]);
+    const { duration } = await loadVideo(videoUrl);
     const frames = await getFrames(videoUrl);
     let asciiFrames = [];
     frames.forEach(async (frame, i) => {
@@ -77,11 +97,11 @@ const getImageDetails = async (e) => {
     const playVideo = setInterval(() => {
         asciiContainer.innerText = asciiFrames[frameCount];
         frameCount++;
-        if(frameCount === asciiFrames.length) {
+        if (frameCount === asciiFrames.length) {
             clearInterval(playVideo);
             console.log(frameCount);
         }
-    }, 100)
+    }, asciiFrames.length / duration);
 
 }
 
