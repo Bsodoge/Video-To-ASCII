@@ -39,7 +39,7 @@ const convertFrameToAscii = (arr, height, width) => {
                     arr[j] = greyscale;
                     arr[j + 1] = greyscale;
                     arr[j + 2] = greyscale;
-                    frameData += greyscale > 100 ? "█" : greyscale > 75 ? "▓" : "▒";
+                    frameData += greyscale > 100 ? "▒" : greyscale > 75 ? "▓" : "█";
                 }
                 frameData += "\n";
                 arr = arr.slice((width * 4));
@@ -94,15 +94,14 @@ const getImageDetails = async e => {
         asciiFrames[i] = await handleFrame(frame);
     })
     let frameCount = 0;
+    const fps =  frames.length / duration;
     const playVideo = setInterval(() => {
         asciiContainer.innerText = asciiFrames[frameCount];
         frameCount++;
-        if (frameCount === asciiFrames.length) {
+        if (frameCount === frames.length) {
             clearInterval(playVideo);
-            console.log(frameCount);
         }
-    }, asciiFrames.length / duration);
-
+    }, 1000 / fps);
 }
 
 
