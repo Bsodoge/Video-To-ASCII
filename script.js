@@ -3,18 +3,23 @@ import getVideoFrames from "https://deno.land/x/get_video_frames@v0.0.9/mod.js";
 const inputElement = document.getElementById("file_input");
 const asciiContainer = document.getElementById("ascii_container");
 const loading = document.getElementById("loading");
+const replayButton = document.getElementById("replay");
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
+const playingVideo = [];
 
-
-const toggleLoading = (state) => {
-    if(state){
+const toggleLoading = state => {
+    if (state) {
         loading.classList.remove("hide");
         inputElement.classList.add("hide");
         return;
     }
     loading.classList.add("hide");
     inputElement.classList.remove("hide")
+}
+
+const toggleReplayButton = state => {
+    state ? replayButton.classList.remove("hide") : replayButton.classList.add("hide");
 }
 
 const getFrames = async videoUrl => {
@@ -61,7 +66,7 @@ const convertFrameToAscii = (arr, height, width) => {
     })
 }
 
-const handleFrame = async (frame) => {
+const handleFrame = async frame => {
     const width = 128;
     const height = 128;
     canvas.width = width;
@@ -96,8 +101,11 @@ const loadVideo = videoUrl => new Promise((resolve, reject) => {
 
 
 const playVideo = (duration, asciiFrames, frames) => {
+    if (playingVideo.length) {
+        clearInterval(playingVideo[0]);
+        playingVideo.pop();
+    }
     let frameCount = 0;
-    console.log(asciiFrames.length);
     const fps = frames.length / duration;
     const playVideo = setInterval(() => {
         asciiContainer.innerText = asciiFrames[frameCount];
@@ -106,10 +114,12 @@ const playVideo = (duration, asciiFrames, frames) => {
             clearInterval(playVideo);
         }
     }, 1000 / fps);
+    playingVideo.push(playVideo);
 }
 
 const getVideoDetails = async e => {
     toggleLoading(true);
+    toggleReplayButton(false);
     const videoUrl = URL.createObjectURL(e.target.files[0]);
     const { duration } = await loadVideo(videoUrl);
     const frames = await getFrames(videoUrl);
@@ -118,7 +128,9 @@ const getVideoDetails = async e => {
         asciiFrames[i] = await handleFrame(frame);
     })
     toggleLoading(false);
+    toggleReplayButton(true);
     playVideo(duration, asciiFrames, frames);
+    replayButton.addEventListener("click", () => playVideo(duration, asciiFrames, frames));
 }
 
 

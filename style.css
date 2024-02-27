@@ -6,3 +6,8 @@
 .hide{
     display: none;
 }
+
+.input_container{
+    display: flex;
+    padding-bottom: 2rem;
+}
