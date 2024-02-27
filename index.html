@@ -10,8 +10,9 @@
 
 <body>
     <div style="display: flex; flex-direction: column;">
-        <input type="file" name="file_input" id="file_input">
-        <div name="ASCII" id="ascii_container"></div>
+        <span class="hide" id="loading">Loading...</span>
+        <input type="file" name="file_input"  accept="video/mp4" id="file_input">
+        <div name="ASCII" class="ascii_container" id="ascii_container"></div>
     </div>
     <script src="script.js" type="module"></script>
 </body>

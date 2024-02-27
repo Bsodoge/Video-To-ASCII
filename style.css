@@ -1,4 +1,8 @@
-#ascii_container{
+.ascii_container{
     width: 100%;
     font-size: 0.2rem;
+}
+
+.hide{
+    display: none;
 }

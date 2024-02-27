@@ -2,10 +2,20 @@ import getVideoFrames from "https://deno.land/x/get_video_frames@v0.0.9/mod.js";
 
 const inputElement = document.getElementById("file_input");
 const asciiContainer = document.getElementById("ascii_container");
-const body = document.getElementsByTagName("body")[0];
+const loading = document.getElementById("loading");
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 
+
+const toggleLoading = (state) => {
+    if(state){
+        loading.classList.remove("hide");
+        inputElement.classList.add("hide");
+        return;
+    }
+    loading.classList.add("hide");
+    inputElement.classList.remove("hide")
+}
 
 const getFrames = async videoUrl => {
     let frames = [];
@@ -85,16 +95,10 @@ const loadVideo = videoUrl => new Promise((resolve, reject) => {
 })
 
 
-const getImageDetails = async e => {
-    const videoUrl = URL.createObjectURL(e.target.files[0]);
-    const { duration } = await loadVideo(videoUrl);
-    const frames = await getFrames(videoUrl);
-    let asciiFrames = [];
-    frames.forEach(async (frame, i) => {
-        asciiFrames[i] = await handleFrame(frame);
-    })
+const playVideo = (duration, asciiFrames, frames) => {
     let frameCount = 0;
-    const fps =  frames.length / duration;
+    console.log(asciiFrames.length);
+    const fps = frames.length / duration;
     const playVideo = setInterval(() => {
         asciiContainer.innerText = asciiFrames[frameCount];
         frameCount++;
@@ -104,6 +108,19 @@ const getImageDetails = async e => {
     }, 1000 / fps);
 }
 
+const getVideoDetails = async e => {
+    toggleLoading(true);
+    const videoUrl = URL.createObjectURL(e.target.files[0]);
+    const { duration } = await loadVideo(videoUrl);
+    const frames = await getFrames(videoUrl);
+    let asciiFrames = [];
+    frames.forEach(async (frame, i) => {
+        asciiFrames[i] = await handleFrame(frame);
+    })
+    toggleLoading(false);
+    playVideo(duration, asciiFrames, frames);
+}
 
 
-inputElement.addEventListener("input", getImageDetails);
+
+inputElement.addEventListener("input", getVideoDetails);
