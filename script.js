@@ -8,6 +8,10 @@ const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 const playingVideo = [];
 const { createWorker } = FFmpeg;
+const worker = createWorker({
+        logger: ({ message }) => console.log(message),
+      });
+
 
 const toggleLoading = state => {
     if (state) {
@@ -123,7 +127,7 @@ const getVideoDetails = async e => {
     toggleReplayButton(false);
     await worker.load();
     await worker.write(e.target.files[0].name, e.target.files[0]);
-    await worker.run(`-i /data/${e.target.files[0].name} output.mp4`);
+    await worker.run(`-i ${e.target.files[0].name} output.mp4`);
     const { data } = await worker.read('output.mp4');
     const videoUrl = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
     const { duration } = await loadVideo(videoUrl);
