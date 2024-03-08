@@ -8,9 +8,7 @@ const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 const playingVideo = [];
 const { createWorker } = FFmpeg;
-const worker = createWorker({
-        logger: ({ message }) => console.log(message),
-      });
+const worker = createWorker({});
 
 
 const toggleLoading = state => {
