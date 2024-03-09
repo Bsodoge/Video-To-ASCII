@@ -12,7 +12,8 @@ const worker = createWorker({
 logger: ({ message }) => console.log(message),
         progress: p => console.log(p),
 });
-
+const width = 128;
+const height = 128;
 
 const toggleLoading = state => {
     if (state) {
@@ -73,8 +74,6 @@ const convertFrameToAscii = (arr, height, width) => {
 }
 
 const handleFrame = async frame => {
-    const width = 128;
-    const height = 128;
     canvas.width = width;
     canvas.height = height;
     asciiContainer.innerText = "";
@@ -126,9 +125,10 @@ const playVideo = (duration, asciiFrames, frames) => {
 const getVideoDetails = async e => {
     toggleLoading(true);
     toggleReplayButton(false);
+    const name = e.target.files[0].name.replace(/ /g, " ")
     await worker.load();
-    await worker.write(e.target.files[0].name, e.target.files[0]);
-    await worker.run(`-i ${e.target.files[0].name} output.mp4`);
+    await worker.write(name, e.target.files[0]);
+    await worker.run(`-i ${name} -vf scale=${width}:${height} output.mp4`);
     const { data } = await worker.read('output.mp4');
     const videoUrl = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
     const { duration } = await loadVideo(videoUrl);
