@@ -125,7 +125,7 @@ const playVideo = (duration, asciiFrames, frames) => {
 const getVideoDetails = async e => {
     toggleLoading(true);
     toggleReplayButton(false);
-    const name = e.target.files[0].name.replace(/ /g, " ")
+    const name = e.target.files[0].name.replace(/ /g, "")
     await worker.load();
     await worker.write(name, e.target.files[0]);
     await worker.run(`-i ${name} -vf scale=${width}:${height} output.mp4`);
