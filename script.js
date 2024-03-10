@@ -78,7 +78,6 @@ const handleFrame = async frame => {
     canvas.height = height;
     asciiContainer.innerText = "";
     ctx.drawImage(frame, 0, 0, width, height);
-    frame.close();
     const imgData = ctx.getImageData(0, 0, width, height);
     let arr = imgData.data;
     canvas.style.border = "1px solid black";
@@ -125,14 +124,22 @@ const playVideo = (duration, asciiFrames, frames) => {
 const getVideoDetails = async e => {
     toggleLoading(true);
     toggleReplayButton(false);
+    const frames = [];
     const name = e.target.files[0].name.replace(/ /g, "")
     await worker.load();
     await worker.write(name, e.target.files[0]);
-    await worker.run(`-i ${name} -vf scale=${width}:${height} output.mp4`);
-    const { data } = await worker.read('output.mp4');
-    const videoUrl = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+    await worker.run(`-i ${name} -vf scale=${width}:${height} %d.jpg`);
+    for(let i = 1; i < 816; i++){
+	const { data } = await worker.read(`${i}.jpg`);
+	const image = URL.createObjectURL(new Blob([data], { type: 'image/jpg' }));
+	const imageElement = document.createElement("img");
+	imageElement.src = image;
+	frames.push(imageElement);
+        console.log(frames);
+    } 
+    const videoUrl = URL.createObjectURL(e.target.files[0]);
     const { duration } = await loadVideo(videoUrl);
-    const frames = await getFrames(videoUrl);
+    //const frames = await getFrames(videoUrl);
     let asciiFrames = [];
     frames.forEach(async (frame, i) => {
         asciiFrames[i] = await handleFrame(frame);
