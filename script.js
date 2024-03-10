@@ -1,5 +1,3 @@
-import getVideoFrames from "https://deno.land/x/get_video_frames@v0.0.9/mod.js";
-
 const inputElement = document.getElementById("file_input");
 const asciiContainer = document.getElementById("ascii_container");
 const loading = document.getElementById("loading");
@@ -8,10 +6,7 @@ const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 const playingVideo = [];
 const { createWorker } = FFmpeg;
-const worker = createWorker({
-logger: ({ message }) => console.log(message),
-        progress: p => console.log(p),
-});
+const worker = createWorker({});
 const width = 128;
 const height = 128;
 
@@ -28,26 +23,6 @@ const toggleLoading = state => {
 const toggleReplayButton = state => {
     state ? replayButton.classList.remove("hide") : replayButton.classList.add("hide");
 }
-
-const getFrames = async videoUrl => {
-    let frames = [];
-    await getVideoFrames({
-        videoUrl,
-        onFrame(frame) {
-            frames.push(frame);
-        },
-        onConfig(config) {
-            canvas.width = 100;
-            canvas.height = 100;
-        },
-        onFinish() {
-            console.log("finished!");
-        }
-    });
-    console.log(frames);
-    return frames;
-}
-
 
 const convertFrameToAscii = (arr, height, width) => {
     return new Promise((resolve, reject) => {
@@ -128,14 +103,19 @@ const getVideoDetails = async e => {
     const name = e.target.files[0].name.replace(/ /g, "")
     await worker.load();
     await worker.write(name, e.target.files[0]);
-    await worker.run(`-i ${name} -vf scale=${width}:${height} %d.jpg`);
-    for(let i = 1; i < 816; i++){
-	const { data } = await worker.read(`${i}.jpg`);
-	const image = URL.createObjectURL(new Blob([data], { type: 'image/jpg' }));
-	const imageElement = document.createElement("img");
-	imageElement.src = image;
-	frames.push(imageElement);
-        console.log(frames);
+    await worker.run(`-i ${name} -vf scale=${width}:${height} %d.jpg`); 
+    let i = 1;
+    while(true){
+	try {
+		const { data } = await worker.read(`${i}.jpg`);
+		const image = URL.createObjectURL(new Blob([data], { type: 'image/jpg' }));
+		const imageElement = document.createElement("img");
+		imageElement.src = image;
+		frames.push(imageElement);
+		i++;
+	} catch(e) {
+		break;
+	}
     } 
     const videoUrl = URL.createObjectURL(e.target.files[0]);
     const { duration } = await loadVideo(videoUrl);
