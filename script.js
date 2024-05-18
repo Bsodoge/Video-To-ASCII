@@ -99,15 +99,17 @@ const playVideo = (duration, asciiFrames, frames) => {
 const getVideoDetails = async e => {
     toggleLoading(true);
     toggleReplayButton(false);
+    clearInterval(playingVideo[0]);
+    playingVideo.pop();
     const frames = [];
     const name = e.target.files[0].name.replace(/ /g, "")
     await worker.load();
     await worker.write(name, e.target.files[0]);
-    await worker.run(`-i ${name} -vf scale=${width}:${height} %d.jpg`); 
+    await worker.run(`-i ${name} -vf scale=${width}:${height} ${name}%d.jpg`); 
     let i = 1;
     while(true){
 	try {
-		const { data } = await worker.read(`${i}.jpg`);
+		const { data } = await worker.read(`${name}${i}.jpg`);
 		const image = URL.createObjectURL(new Blob([data], { type: 'image/jpg' }));
 		const imageElement = document.createElement("img");
 		imageElement.src = image;
